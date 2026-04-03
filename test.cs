@@ -1,6 +1,5 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
-using Xunit;
 
 public class UnitTest1 : IDisposable
 {
