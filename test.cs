@@ -33,75 +33,93 @@ public class UnitTest1 : IDisposable
     }
 
     [Fact]
-    public void LoginWithValid()
+    public void ErrorMessageOnEmptyLogin()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
-        driver.FindElement(By.Id("authSubmit")).Click();
+        var loginTb = driver.FindElement(By.Id("authUsername"));
+        var passwordTb = driver.FindElement(By.Id("authPassword"));
 
-        Assert.Contains("dashboard", driver.Url);
+        var requaredLogin = loginTb.GetAttribute("required");
+        var requaredPassword = passwordTb.GetAttribute("required");
+
+        Assert.NotNull(requaredLogin);
+        Assert.NotNull(requaredPassword);
     }
 
     [Fact]
-    public void LoginWithInvalidPassword()
+    public void LoginWithIncorrectCredentials()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("wrong");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        var errorMessage = driver.FindElement(By.ClassName("error"));
-        Assert.True(errorMessage.Displayed);
-        Assert.Contains("https://test.webmx.ru/", driver.Url);
+        var notesContainer = driver.FindElements(By.Id("notesSection"));
+        var hidden = notesContainer[0].GetAttribute("class");
+        Assert.Contains("hidden", hidden);
     }
 
     [Fact]
-    public void LogoutFromSystem()
+    public void LoginWithCorrectCredentials()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("logout")).Click();
+        Thread.Sleep(500);
 
-        Assert.Contains("https://test.webmx.ru/", driver.Url);
+        var notesContainer = driver.FindElement(By.Id("notesSection"));
+        Assert.True(notesContainer.Displayed);
     }
 
     [Fact]
-    public void CheckMainElementsAfterLogin()
+    public void LogoutFromAccount()
     {
         driver.Url = "https://test.webmx.ru/";
-
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        var menu = driver.FindElement(By.TagName("nav"));
-        var content = driver.FindElement(By.TagName("main"));
+        Thread.Sleep(500);
 
-        Assert.True(menu.Displayed);
-        Assert.True(content.Displayed);
+        var logoutButton = driver.FindElement(By.Id("logoutBtn"));
+        logoutButton.Click();
+
+        Thread.Sleep(500);
+
+        var notesContainer = driver.FindElements(By.Id("notesSection"));
+        var hidden = notesContainer[0].GetAttribute("class");
+        Assert.Contains("hidden", hidden);
     }
 
     [Fact]
-    public void NavigateBetweenSections()
+    public void CheckMainAreaAfterLogin()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.LinkText("Профиль")).Click();
-        Assert.Contains("profile", driver.Url);
+        Thread.Sleep(500);
 
-        driver.FindElement(By.LinkText("Заметки")).Click();
-        Assert.Contains("notes", driver.Url);
+        var notesContainer = driver.FindElement(By.Id("notesSection"));
+        var addButton = driver.FindElement(By.Id("newNoteBtn"));
+        var searchInput = driver.FindElement(By.Id("searchInput"));
+        var logoutButton = driver.FindElement(By.Id("logoutBtn"));
+
+        Thread.Sleep(500);
+
+        Assert.True(notesContainer.Displayed);
+        Assert.True(addButton.Displayed);
+        Assert.True(addButton.Enabled);
+        Assert.True(searchInput.Displayed);
+        Assert.True(searchInput.Enabled);
+        Assert.True(logoutButton.Displayed);
     }
 
     [Fact]
@@ -109,51 +127,71 @@ public class UnitTest1 : IDisposable
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("createNote")).Click();
-        driver.FindElement(By.Id("noteTitle")).SendKeys("Моя заметка");
-        driver.FindElement(By.Id("noteContent")).SendKeys("Текст заметки");
-        driver.FindElement(By.Id("saveNote")).Click();
+        Thread.Sleep(500);
 
-        var successMessage = driver.FindElement(By.ClassName("success"));
-        Assert.True(successMessage.Displayed);
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("test1");
+        driver.FindElement(By.Id("noteContent")).SendKeys("test1");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+        var note = driver.FindElement(By.XPath("/html/body/div/section[2]/div[2]/aside/ul/li/strong"));
+        Assert.Contains("test", note.Text);
     }
 
     [Fact]
-    public void CreateNoteWithEmptyFields()
+    public void CreateEmptyNote()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("createNote")).Click();
-        driver.FindElement(By.Id("saveNote")).Click();
+        System.Threading.Thread.Sleep(500);
 
-        var errorMessage = driver.FindElement(By.ClassName("error"));
-        Assert.True(errorMessage.Displayed);
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+
+        System.Threading.Thread.Sleep(500);
+
+        var noteTitle = driver.FindElement(By.Id("noteTitle"));
+        var requaredTitle = noteTitle.GetAttribute("required");
+
+        Assert.NotNull(requaredTitle);
     }
 
     [Fact]
-    public void EditExistingNote()
+    public void EditNote()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.CssSelector(".note-item:first-child .edit")).Click();
-        driver.FindElement(By.Id("noteContent")).Clear();
-        driver.FindElement(By.Id("noteContent")).SendKeys("Новый текст");
-        driver.FindElement(By.Id("saveNote")).Click();
+        Thread.Sleep(500);
 
-        var successMessage = driver.FindElement(By.ClassName("success"));
-        Assert.True(successMessage.Displayed);
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("tes");
+        driver.FindElement(By.Id("noteContent")).SendKeys("test");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+
+        driver.FindElement(By.Id("noteTitle")).Clear();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("test");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+        var note = driver.FindElement(By.XPath("/html/body/div/section[2]/div[2]/aside/ul/li/strong"));
+        Assert.Contains("test", note.Text);
     }
 
     [Fact]
@@ -161,129 +199,165 @@ public class UnitTest1 : IDisposable
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.CssSelector(".note-item:first-child .delete")).Click();
-        driver.FindElement(By.Id("confirmDelete")).Click();
+        Thread.Sleep(500);
 
-        var successMessage = driver.FindElement(By.ClassName("success"));
-        Assert.True(successMessage.Displayed);
+        var notes = driver.FindElement(By.Id("notesList"));
+        int countBefore = notes.FindElements(By.TagName("li")).Count;
+
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("test");
+        driver.FindElement(By.Id("noteContent")).SendKeys("test");
+        driver.FindElement(By.Id("saveBtn")).Click();
+          
+        Thread.Sleep(500);
+
+        driver.FindElement(By.Id("deleteBtn")).Click();
+
+        IAlert alert = driver.SwitchTo().Alert();
+        alert.Accept();
+
+        Thread.Sleep(500);
+
+        Assert.Equal(countBefore, notes.FindElements(By.TagName("li")).Count);
+
     }
 
     [Fact]
-    public void SearchByExistingText()
+    public void SearchNoteByTitle()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("search")).SendKeys("Моя заметка");
-        driver.FindElement(By.Id("searchButton")).Click();
+        Thread.Sleep(500);
 
-        var results = driver.FindElements(By.CssSelector(".note-item"));
-        Assert.True(results.Count > 0);
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("testS");
+        driver.FindElement(By.Id("noteContent")).SendKeys("testS");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+
+        driver.FindElement(By.Id("searchInput")).SendKeys("testS");
+
+        var note = driver.FindElement(By.XPath("/html/body/div/section[2]/div[2]/aside/ul/li/strong"));
+        Assert.Contains("testS", note.Text);
     }
 
     [Fact]
-    public void SearchByNonExistingText()
+    public void SearchWithEmptyResult()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("search")).SendKeys("zzzxyz123");
-        driver.FindElement(By.Id("searchButton")).Click();
+        Thread.Sleep(500);
 
-        var noResults = driver.FindElement(By.ClassName("no-results"));
-        Assert.True(noResults.Displayed);
+        driver.FindElement(By.Id("searchInput")).SendKeys("zxc");
+
+        Thread.Sleep(500);
+
+        var noResults = driver.FindElement(By.XPath("//*[@id=\"notesList\"]/li"));
+        Assert.Contains("Нет заметок. Создайте первую заметку.", noResults.Text);
+    }
+
+
+    [Fact]
+    public void SuccessMessageAfterCreateNote()
+    {
+        driver.Url = "https://test.webmx.ru/";
+
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
+        driver.FindElement(By.Id("authSubmit")).Click();
+
+        Thread.Sleep(500);
+
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("Тест сообщения");
+        driver.FindElement(By.Id("noteContent")).SendKeys("Содержимое");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+        var messageDiv = driver.FindElement(By.Id("message"));
+        var classAttribute = messageDiv.GetAttribute("class");
+
+        Assert.Contains("ok", classAttribute);
+        Assert.True(messageDiv.Displayed);
     }
 
     [Fact]
-    public void CantSeeOtherUsersNotes()
+    public void SuccessMessageAfterUpdateNote()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("user1@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("pass1");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("search")).SendKeys("user2");
-        driver.FindElement(By.Id("searchButton")).Click();
+        Thread.Sleep(500);
 
-        var noResults = driver.FindElement(By.ClassName("no-results"));
-        Assert.True(noResults.Displayed);
+        driver.FindElement(By.Id("newNoteBtn")).Click();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("Для обновления");
+        driver.FindElement(By.Id("noteContent")).SendKeys("Старый текст");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+        driver.FindElement(By.Id("noteTitle")).Clear();
+        driver.FindElement(By.Id("noteTitle")).SendKeys("Обновленная заметка");
+        driver.FindElement(By.Id("saveBtn")).Click();
+
+        Thread.Sleep(500);
+
+        var messageDiv = driver.FindElement(By.Id("message"));
+        Assert.Contains("ok", messageDiv.GetAttribute("class"));
     }
 
     [Fact]
-    public void NoEditButtonsAfterLogout()
+    public void SuccessMessageAfterLogout()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non1");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("logout")).Click();
+        Thread.Sleep(500);
 
-        var editButtons = driver.FindElements(By.CssSelector(".edit"));
-        Assert.Equal(0, editButtons.Count);
+        driver.FindElement(By.Id("logoutBtn")).Click();
+
+        Thread.Sleep(500);
+
+        var messageDiv = driver.FindElement(By.Id("message"));
+        Assert.Contains("ok", messageDiv.GetAttribute("class"));
     }
 
     [Fact]
-    public void SuccessMessageAfterSave()
+    public void ErrorMessageOnLogin()
     {
         driver.Url = "https://test.webmx.ru/";
 
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
+        driver.FindElement(By.Id("authUsername")).SendKeys("non2");
+        driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        driver.FindElement(By.Id("createNote")).Click();
-        driver.FindElement(By.Id("noteTitle")).SendKeys("Тест");
-        driver.FindElement(By.Id("saveNote")).Click();
+        Thread.Sleep(500);
 
-        var message = driver.FindElement(By.ClassName("success"));
-        Assert.Contains("сохранено", message.Text.ToLower());
+        var messageDiv = driver.FindElement(By.Id("message"));
+        var classAttribute = messageDiv.GetAttribute("class");
+
+        Assert.Contains("error", classAttribute);
     }
 
-    [Fact]
-    public void ErrorMessageOnInvalidAction()
-    {
-        driver.Url = "https://test.webmx.ru/";
-
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
-        driver.FindElement(By.Id("authSubmit")).Click();
-
-        driver.FindElement(By.CssSelector(".note-item:first-child .delete")).Click();
-        driver.FindElement(By.Id("cancelDelete")).Click();
-
-        var errorMessage = driver.FindElement(By.ClassName("error"));
-        Assert.True(errorMessage.Displayed);
-    }
-
-    [Fact]
-    public void CancelEditNoChanges()
-    {
-        driver.Url = "https://test.webmx.ru/";
-
-        driver.FindElement(By.Id("authUsername")).SendKeys("test@test.ru");
-        driver.FindElement(By.Id("authPassword")).SendKeys("123456");
-        driver.FindElement(By.Id("authSubmit")).Click();
-
-        string oldText = driver.FindElement(By.CssSelector(".note-item:first-child .content")).Text;
-
-        driver.FindElement(By.CssSelector(".note-item:first-child .edit")).Click();
-        driver.FindElement(By.Id("noteContent")).SendKeys("Временный текст");
-        driver.FindElement(By.Id("cancelEdit")).Click();
-
-        string newText = driver.FindElement(By.CssSelector(".note-item:first-child .content")).Text;
-        Assert.Equal(oldText, newText);
-    }
 }
