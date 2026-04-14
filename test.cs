@@ -1,4 +1,5 @@
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 
 public class UnitTest1 : IDisposable
@@ -56,8 +57,8 @@ public class UnitTest1 : IDisposable
         driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        var notesContainer = driver.FindElements(By.Id("notesSection"));
-        var hidden = notesContainer[0].GetAttribute("class");
+        var notes = driver.FindElements(By.Id("notesSection"));
+        var hidden = notes[0].GetAttribute("class");
         Assert.Contains("hidden", hidden);
     }
 
@@ -72,8 +73,8 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var notesContainer = driver.FindElement(By.Id("notesSection"));
-        Assert.True(notesContainer.Displayed);
+        var notes = driver.FindElement(By.Id("notesSection"));
+        Assert.True(notes.Displayed);
     }
 
     [Fact]
@@ -91,8 +92,8 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var notesContainer = driver.FindElements(By.Id("notesSection"));
-        var hidden = notesContainer[0].GetAttribute("class");
+        var notes = driver.FindElements(By.Id("notesSection"));
+        var hidden = notes[0].GetAttribute("class");
         Assert.Contains("hidden", hidden);
     }
 
@@ -107,19 +108,19 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var notesContainer = driver.FindElement(By.Id("notesSection"));
-        var addButton = driver.FindElement(By.Id("newNoteBtn"));
-        var searchInput = driver.FindElement(By.Id("searchInput"));
-        var logoutButton = driver.FindElement(By.Id("logoutBtn"));
+        var notes = driver.FindElement(By.Id("notesSection"));
+        var add = driver.FindElement(By.Id("newNoteBtn"));
+        var search = driver.FindElement(By.Id("searchInput"));
+        var logout = driver.FindElement(By.Id("logoutBtn"));
 
         Thread.Sleep(500);
 
-        Assert.True(notesContainer.Displayed);
-        Assert.True(addButton.Displayed);
-        Assert.True(addButton.Enabled);
-        Assert.True(searchInput.Displayed);
-        Assert.True(searchInput.Enabled);
-        Assert.True(logoutButton.Displayed);
+        Assert.True(notes.Displayed);
+        Assert.True(add.Displayed);
+        Assert.True(add.Enabled);
+        Assert.True(search.Displayed);
+        Assert.True(search.Enabled);
+        Assert.True(logout.Displayed);
     }
 
     [Fact]
@@ -153,11 +154,11 @@ public class UnitTest1 : IDisposable
         driver.FindElement(By.Id("authPassword")).SendKeys("111111");
         driver.FindElement(By.Id("authSubmit")).Click();
 
-        System.Threading.Thread.Sleep(500);
+        Thread.Sleep(500);
 
         driver.FindElement(By.Id("newNoteBtn")).Click();
 
-        System.Threading.Thread.Sleep(500);
+        Thread.Sleep(500);
 
         var noteTitle = driver.FindElement(By.Id("noteTitle"));
         var requaredTitle = noteTitle.GetAttribute("required");
@@ -266,8 +267,8 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var noResults = driver.FindElement(By.XPath("//*[@id=\"notesList\"]/li"));
-        Assert.Contains("Нет заметок. Создайте первую заметку.", noResults.Text);
+        var no = driver.FindElement(By.XPath("//*[@id=\"notesList\"]/li"));
+        Assert.Contains("Нет заметок. Создайте первую заметку.", no.Text);
     }
 
 
@@ -289,11 +290,11 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var messageDiv = driver.FindElement(By.Id("message"));
-        var classAttribute = messageDiv.GetAttribute("class");
+        var message = driver.FindElement(By.Id("message"));
+        var classe = message.GetAttribute("class");
 
-        Assert.Contains("ok", classAttribute);
-        Assert.True(messageDiv.Displayed);
+        Assert.Contains("ok", classe);
+        Assert.True(message.Displayed);
     }
 
     [Fact]
@@ -320,8 +321,8 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var messageDiv = driver.FindElement(By.Id("message"));
-        Assert.Contains("ok", messageDiv.GetAttribute("class"));
+        var message = driver.FindElement(By.Id("message"));
+        Assert.Contains("ok", message.GetAttribute("class"));
     }
 
     [Fact]
@@ -339,8 +340,8 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var messageDiv = driver.FindElement(By.Id("message"));
-        Assert.Contains("ok", messageDiv.GetAttribute("class"));
+        var message = driver.FindElement(By.Id("message"));
+        Assert.Contains("ok", message.GetAttribute("class"));
     }
 
     [Fact]
@@ -354,10 +355,10 @@ public class UnitTest1 : IDisposable
 
         Thread.Sleep(500);
 
-        var messageDiv = driver.FindElement(By.Id("message"));
-        var classAttribute = messageDiv.GetAttribute("class");
+        var message = driver.FindElement(By.Id("message"));
+        var classe = message.GetAttribute("class");
 
-        Assert.Contains("error", classAttribute);
+        Assert.Contains("error", classe);
     }
 
 }
